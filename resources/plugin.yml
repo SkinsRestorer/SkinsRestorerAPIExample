@@ -1,0 +1,8 @@
+name: ${project.name}
+main: net.skinsrestorer.SkinsRestorerAPIExample
+version: ${project.version}
+description: ${project.description}
+website: https://skinsrestorer.net/
+authors: [McLive]
+api-version: 1.14
+depend: [SkinsRestorer]
