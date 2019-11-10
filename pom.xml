@@ -32,7 +32,7 @@
         <dependency>
             <groupId>com</groupId>
             <artifactId>skinsrestorer</artifactId>
-            <version>13.7.3-SNAPSHOT</version>
+            <version>13.7.4-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
