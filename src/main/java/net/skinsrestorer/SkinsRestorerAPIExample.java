@@ -5,36 +5,28 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-//Skinsrestorer imports!
-import skinsrestorer.bukkit.SkinsRestorer;
-import skinsrestorer.bukkit.SkinsRestorerBukkitAPI;
-import skinsrestorer.shared.exception.SkinRequestException;
+// Skinsrestorer imports!
+import net.skinsrestorer.api.SkinsRestorerAPI;
+import net.skinsrestorer.api.PlayerWrapper;
+import net.skinsrestorer.shared.exception.SkinRequestException;
 
-/**
- * Created by McLive on 30.08.2019.
- */
 public class SkinsRestorerAPIExample extends JavaPlugin {
-    private CommandSender console;
     // Setting definition
-    private SkinsRestorer skinsRestorer;
-    private SkinsRestorerBukkitAPI skinsRestorerBukkitAPI;
+    private SkinsRestorerAPI skinsRestorerAPI;
 
-
+    @Override
     public void onEnable() {
-        console = getServer().getConsoleSender();
+        CommandSender console = getServer().getConsoleSender();
         console.sendMessage("Loading SkinsRestorer API...");
-        
-        //Connecting to the main SkinsRestorer API
-        skinsRestorer = JavaPlugin.getPlugin(SkinsRestorer.class);
-        console.sendMessage(skinsRestorer.toString());
 
         // Connecting to Bukkit API for applying the skin
-        skinsRestorerBukkitAPI = skinsRestorer.getSkinsRestorerBukkitAPI();
-        console.sendMessage(skinsRestorerBukkitAPI.toString());
+        skinsRestorerAPI = SkinsRestorerAPI.getApi();
+        console.sendMessage(skinsRestorerAPI.toString());
 
         this.getCommand("api").setExecutor(this);
     }
 
+    @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("You can only run this command as a player.");
@@ -43,7 +35,7 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
 
         if (args.length < 1) {
             sender.sendMessage("/api <skin name>");
-            return true;
+            return false;
         }
 
         Player player = (Player) sender;
@@ -51,12 +43,11 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
 
         player.sendMessage("Setting your skin to " + skin);
 
-        
         try {
             // setskin for player skin 
-            skinsRestorerBukkitAPI.setSkin(player.getName(), skin);
+            skinsRestorerAPI.setSkin(player.getName(), skin);
             // Force skinrefresh for player
-            skinsRestorerBukkitAPI.applySkin(player);
+            skinsRestorerAPI.applySkin(new PlayerWrapper(player));
         } catch (SkinRequestException e) {
             e.printStackTrace();
         }
