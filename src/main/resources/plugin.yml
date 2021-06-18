@@ -4,9 +4,9 @@ version: ${project.version}
 description: ${project.description}
 website: https://skinsrestorer.net/
 author: SRTeam
-authors: ["McLive", "AlexProgrammerDE"]
+authors: [ "McLive", "AlexProgrammerDE" ]
 api-version: 1.13
-depend: ["SkinsRestorer"]
+depend: [ "SkinsRestorer" ]
 
 commands:
   api:
