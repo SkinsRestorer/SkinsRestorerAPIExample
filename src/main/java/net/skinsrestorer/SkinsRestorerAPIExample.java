@@ -1,14 +1,16 @@
 package net.skinsrestorer;
 
+import net.skinsrestorer.api.PlayerWrapper;
+import net.skinsrestorer.api.SkinsRestorerAPI;
 import net.skinsrestorer.api.exception.SkinRequestException;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-// Skinsrestorer imports!
-import net.skinsrestorer.api.SkinsRestorerAPI;
-import net.skinsrestorer.api.PlayerWrapper;
+import java.util.logging.Logger;
 
 public class SkinsRestorerAPIExample extends JavaPlugin {
     // Setting definition
@@ -16,37 +18,40 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        CommandSender console = getServer().getConsoleSender();
-        console.sendMessage("Loading SkinsRestorer API...");
+        Logger log = getLogger();
 
-        // Connecting to Bukkit API for applying the skin
+        log.info(ChatColor.AQUA + "Hooking into SkinsRestorer API");
+        // Connecting to SkinsRestorer API for applying the skin
         skinsRestorerAPI = SkinsRestorerAPI.getApi();
-        console.sendMessage(skinsRestorerAPI.toString());
 
+        log.info(ChatColor.AQUA + "Registering command");
         this.getCommand("api").setExecutor(this);
+
+        log.info(ChatColor.AQUA + "Done! :D");
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("You can only run this command as a player.");
+            sender.sendMessage(ChatColor.RED + "You can only run this command as a player!");
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage("/api <skin name>");
+            sender.sendMessage(ChatColor.RED + "/api <skin name>");
             return false;
         }
 
         Player player = (Player) sender;
         String skin = args[0];
 
-        player.sendMessage("Setting your skin to " + skin);
+        player.sendMessage(ChatColor.AQUA + "Setting your skin to " + skin);
 
         try {
-            // setskin for player skin 
+            // #setSkin() for player skin
             skinsRestorerAPI.setSkin(player.getName(), skin);
-            // Force skinrefresh for player
+
+            // Force skin refresh for player
             skinsRestorerAPI.applySkin(new PlayerWrapper(player));
         } catch (SkinRequestException e) {
             e.printStackTrace();

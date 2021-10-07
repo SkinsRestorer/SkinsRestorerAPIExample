@@ -3,9 +3,10 @@ main: net.skinsrestorer.SkinsRestorerAPIExample
 version: ${project.version}
 description: ${project.description}
 website: https://skinsrestorer.net/
-authors: [McLive]
+author: SRTeam
+authors: [ "McLive", "AlexProgrammerDE" ]
 api-version: 1.13
-depend: [SkinsRestorer]
+depend: [ "SkinsRestorer" ]
 
 commands:
   api:
