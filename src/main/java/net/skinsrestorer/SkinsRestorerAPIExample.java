@@ -1,5 +1,6 @@
 package net.skinsrestorer;
 
+import net.skinsrestorer.api.exception.SkinRequestException;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -8,7 +9,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 // Skinsrestorer imports!
 import net.skinsrestorer.api.SkinsRestorerAPI;
 import net.skinsrestorer.api.PlayerWrapper;
-import net.skinsrestorer.shared.exception.SkinRequestException;
 
 public class SkinsRestorerAPIExample extends JavaPlugin {
     // Setting definition
