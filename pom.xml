@@ -13,6 +13,10 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>codemc-snapshots</id>
+            <url>https://repo.codemc.org/repository/maven-releases/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -27,16 +31,14 @@
         <!-- SkinsRestorer API -->
         <dependency>
             <groupId>net.skinsrestorer</groupId>
-            <artifactId>skinsrestorer</artifactId>
-            <version>14.1.7-SNAPSHOT</version>
+            <artifactId>skinsrestorer-api</artifactId>
+            <version>14.1.6</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <build>
