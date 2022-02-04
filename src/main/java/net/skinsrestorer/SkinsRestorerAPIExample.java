@@ -1,15 +1,19 @@
 package net.skinsrestorer;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.skinsrestorer.api.PlayerWrapper;
 import net.skinsrestorer.api.SkinsRestorerAPI;
 import net.skinsrestorer.api.exception.SkinRequestException;
 import net.skinsrestorer.api.property.GenericProperty;
+import net.skinsrestorer.api.property.IProperty;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Base64;
 import java.util.logging.Logger;
 
 public class SkinsRestorerAPIExample extends JavaPlugin {
@@ -41,19 +45,58 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
             return true;
         }
 
+        //help on /api
         if (args.length < 1) {
-            sender.sendMessage(ChatColor.RED + "/api <skin name>");
+            sender.sendMessage(ChatColor.RED + "/api skin <skin name> - set your skin from name");
+            sender.sendMessage(ChatColor.RED + "/api custom - apply our custom skin from values :)");
+            sender.sendMessage(ChatColor.RED + "/api genskin <url> [steve/slim] - generate skin from url using mineskin");
             return false;
         }
 
         Player player = (Player) sender;
         String skin = args[0];
 
+        sender.sendMessage("args.length" + args.length);
+
+        // /api genskin <url>
+        if (skin.equalsIgnoreCase("genskin") && args.length >= 2) {
+            String skinType = "";
+            GenericProperty skinProps = null;
+            if (args.length >= 3 && args[2].equalsIgnoreCase("steve") || args[2].equalsIgnoreCase("slim"))
+                skinType = args[2].toLowerCase();
+
+            try {
+                sender.sendMessage("uploading skin: " + args[1]);
+                skinProps = new GenericProperty(skinsRestorerAPI.genSkinUrl(args[1], skinType));
+
+            } catch (SkinRequestException ignored) {
+                return false;
+            }
+
+            sender.sendMessage("-- skin info for: " + args[1] + " --");
+            sender.sendMessage("Name" + skinProps.getName());
+            sender.sendMessage("Value" + skinProps.getValue());
+            sender.sendMessage("Signature" + skinProps.getSignature());
+
+            sender.sendMessage("----------------");
+
+            // this is the same what we do over at skinsRestorerAPI.getSkinTextureUrl
+            byte[] decoded = Base64.getDecoder().decode(skinProps.getValue());
+            String decodedString = new String(decoded);
+            JsonObject jsonObject = JsonParser.parseString(decodedString).getAsJsonObject();
+            String skinUrl = jsonObject.getAsJsonObject().get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").toString();
+            skinUrl = skinUrl.substring(1, skinUrl.length() - 1);
+
+            sender.sendMessage("skintextureUrl: " + skinUrl);
+
+            return true;
+        }
+
         player.sendMessage(ChatColor.AQUA + "Setting your skin to " + skin);
 
         try {
             // /api custom
-            if (skin.equals("custom")) {
+            if (skin.equalsIgnoreCase("custom")) {
                 skinsRestorerAPI.setSkinData("custom", new GenericProperty("textures", VALUE, SIGNATURE), null);
             }
 
@@ -65,7 +108,6 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
         } catch (SkinRequestException e) {
             e.printStackTrace();
         }
-
         return true;
     }
 }
