@@ -50,6 +50,7 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
             sender.sendMessage(ChatColor.RED + "/api skin <skin name> - set your skin from name");
             sender.sendMessage(ChatColor.RED + "/api custom - apply our custom skin from values :)");
             sender.sendMessage(ChatColor.RED + "/api genskin <url> [steve/slim] - generate skin from url using mineskin");
+            sender.sendMessage(ChatColor.RED + "/api getskinurl get current skin url");
             return false;
         }
 
@@ -90,6 +91,12 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
             sender.sendMessage("skintextureUrl: " + skinUrl);
 
             return true;
+        }
+
+
+        if (skin.equalsIgnoreCase("getSkinUrl")) {
+            // get textures.minecraft.net url for player current skin
+            sender.sendMessage(skinsRestorerAPI.getSkinTextureUrl(skinsRestorerAPI.getSkinName(player.getName())));
         }
 
         player.sendMessage(ChatColor.AQUA + "Setting your skin to " + skin);
