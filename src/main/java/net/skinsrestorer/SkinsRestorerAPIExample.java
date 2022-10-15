@@ -3,6 +3,7 @@ package net.skinsrestorer;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.skinsrestorer.api.PlayerWrapper;
+import net.skinsrestorer.api.SkinVariant;
 import net.skinsrestorer.api.SkinsRestorerAPI;
 import net.skinsrestorer.api.exception.SkinRequestException;
 import net.skinsrestorer.api.property.GenericProperty;
@@ -59,16 +60,21 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
 
         sender.sendMessage("args.length" + args.length);
 
+
+
+
+
         // /api genskin <url>
         if (skin.equalsIgnoreCase("genskin") && args.length >= 2) {
-            String skinType = "";
-            GenericProperty skinProps = null;
+            String skinType = null;
+            IProperty skinProps = null;
             if (args.length >= 3 && args[2].equalsIgnoreCase("steve") || args[2].equalsIgnoreCase("slim"))
                 skinType = args[2].toLowerCase();
 
             try {
                 sender.sendMessage("uploading skin: " + args[1]);
-                skinProps = new GenericProperty(skinsRestorerAPI.genSkinUrl(args[1], skinType));
+
+                skinProps = skinsRestorerAPI.genSkinUrl(args[1], SkinVariant.valueOf(skinType));
 
             } catch (SkinRequestException ignored) {
                 return false;
@@ -96,7 +102,7 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
 
         if (skin.equalsIgnoreCase("getSkinUrl")) {
             // get textures.minecraft.net url for player current skin
-            sender.sendMessage(skinsRestorerAPI.getSkinTextureUrl(skinsRestorerAPI.getSkinName(player.getName())));
+            sender.sendMessage(skinsRestorerAPI.getSkinTextureUrl(SkinsRestorerAPI.getApi().getSkinData(player.getName())));
         }
 
         player.sendMessage(ChatColor.AQUA + "Setting your skin to " + skin);
@@ -104,7 +110,7 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
         try {
             // /api custom
             if (skin.equalsIgnoreCase("custom")) {
-                skinsRestorerAPI.setSkinData("custom", new GenericProperty("textures", VALUE, SIGNATURE), null);
+                skinsRestorerAPI.setSkinData("custom", skinsRestorerAPI.createPlatformProperty("textures", VALUE, SIGNATURE), 0);
             }
 
             // #setSkin() for player skin
