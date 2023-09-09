@@ -1,20 +1,26 @@
 package net.skinsrestorer;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.skinsrestorer.api.PlayerWrapper;
-import net.skinsrestorer.api.SkinVariant;
-import net.skinsrestorer.api.SkinsRestorerAPI;
-import net.skinsrestorer.api.exception.SkinRequestException;
-import net.skinsrestorer.api.property.GenericProperty;
-import net.skinsrestorer.api.property.IProperty;
+import net.skinsrestorer.api.PropertyUtil;
+import net.skinsrestorer.api.SkinsRestorer;
+import net.skinsrestorer.api.SkinsRestorerProvider;
+import net.skinsrestorer.api.connections.MineSkinAPI;
+import net.skinsrestorer.api.connections.model.MineSkinResponse;
+import net.skinsrestorer.api.exception.DataRequestException;
+import net.skinsrestorer.api.exception.MineSkinException;
+import net.skinsrestorer.api.property.InputDataResult;
+import net.skinsrestorer.api.property.SkinProperty;
+import net.skinsrestorer.api.property.SkinVariant;
+import net.skinsrestorer.api.storage.PlayerStorage;
+import net.skinsrestorer.api.storage.SkinStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Base64;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class SkinsRestorerAPIExample extends JavaPlugin {
@@ -23,31 +29,30 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
     public static String SIGNATURE = "P2+tca61qcDIdKmIUgENZ0bhGzq3Y7mlGrBNpqVTMXGem8A8dBv7JaUqJqdwdFDhQOn9VExiUbPWQLbTc/OQezXxonFw2Wwq7wK1lRGPUwZIpLQxPh9JgkVPBib/vG/wgGm7qMscvkRp06vhQB1OdtFEKnPwt5T6GLfCnP5ifLPaWo9FCdr5bgO7RaozXS4hgGLjt1y87JAWZMABWuFQGPeNgnDQAlSVQTKNYosxjyl51wwDZxhHnjmW1UUqZZehQ2NlQ2G/bdp2sasf/8aWfWkLNifY01c7pNGDAtVPes5C0xAjHnCjNpiId/ylKYeb0HCM3w18N5kWPo2LULHb4R7TVgXuHBoIYHr70zx1DSutNLchh5NmTp/FhRZgkP6sucBVu6Cq1g4RP11B7vkQRZJbjAl6r0ur7pRha+ZFI6hR+k8NNqSWozree5oR7xZ7gaSKARcD9i78YNRXbDRprastLWV3iwH2SEeEV2JmgDXN+CjM6HJ0liXfz7VtRKajG8zF/9ZH3RxegbRxiqzs+CUkJnHtxKuDYjfScW6uFflvh8/Wf//xEulzxEgdAZdXzBgwPv3U8uXgfN1qHP0SAVaivZPL5g7e0hDTdrXFbUA6+n6PTssuwf52gLGdMaHJ0AOdrlgXxDSFb7LXEg+bWv8lFs34SlVFyCmZFEOLvZU=";
 
     // Store the SkinsRestorer API instance for later
-    private SkinsRestorerAPI skinsRestorerAPI;
+    private SkinsRestorer skinsRestorerAPI;
+    private final Logger logger = getLogger();
 
     @Override
     public void onEnable() {
-        Logger log = getLogger();
-
-        log.info(ChatColor.AQUA + "Hooking into SkinsRestorer API");
+        logger.info(ChatColor.AQUA + "Hooking into SkinsRestorer API");
         // Retrieve the SkinsRestorer API for applying the skin
-        skinsRestorerAPI = SkinsRestorerAPI.getApi();
+        skinsRestorerAPI = SkinsRestorerProvider.get();
 
-        log.info(ChatColor.AQUA + "Registering command");
+        logger.info(ChatColor.AQUA + "Registering command");
         getCommand("api").setExecutor(this);
 
-        log.info(ChatColor.AQUA + "Done! :D");
+        logger.info(ChatColor.AQUA + "Done! :D");
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "You can only run this command as a player!");
             return true;
         }
 
-        //help on /api
-        if (args.length < 1) {
+        // Help on /api without arguments
+        if (args.length == 0) {
             sender.sendMessage(ChatColor.RED + "/api skin <skin name> - set your skin from name");
             sender.sendMessage(ChatColor.RED + "/api custom - apply our custom skin from values :)");
             sender.sendMessage(ChatColor.RED + "/api genskin <url> [steve/slim] - generate skin from url using mineskin");
@@ -55,72 +60,94 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
             return false;
         }
 
-        Player player = (Player) sender;
         String skin = args[0];
 
         sender.sendMessage("args.length" + args.length);
 
-
-
-
-
         // /api genskin <url>
         if (skin.equalsIgnoreCase("genskin") && args.length >= 2) {
-            String skinType = null;
-            IProperty skinProps = null;
-            if (args.length >= 3 && args[2].equalsIgnoreCase("steve") || args[2].equalsIgnoreCase("slim"))
-                skinType = args[2].toLowerCase();
-
-            try {
-                sender.sendMessage("uploading skin: " + args[1]);
-
-                skinProps = skinsRestorerAPI.genSkinUrl(args[1], SkinVariant.valueOf(skinType));
-
-            } catch (SkinRequestException ignored) {
-                return false;
+            SkinVariant skinVariant = null;
+            if (args.length >= 3 && args[2].equalsIgnoreCase("steve") || args[2].equalsIgnoreCase("slim")) {
+                skinVariant = SkinVariant.valueOf(args[2].toUpperCase(Locale.ROOT));
             }
 
-            sender.sendMessage("-- skin info for: " + args[1] + " --");
-            sender.sendMessage("Name" + skinProps.getName());
-            sender.sendMessage("Value" + skinProps.getValue());
-            sender.sendMessage("Signature" + skinProps.getSignature());
+            try {
+                sender.sendMessage("Generating skin for: " + args[1]);
 
-            sender.sendMessage("----------------");
+                MineSkinAPI mineSkinAPI = skinsRestorerAPI.getMineSkinAPI();
+                MineSkinResponse response = mineSkinAPI.genSkin(args[1], skinVariant);
+                SkinProperty skinProperty = response.getProperty();
 
-            // this is the same what we do over at skinsRestorerAPI.getSkinTextureUrl
-            byte[] decoded = Base64.getDecoder().decode(skinProps.getValue());
-            String decodedString = new String(decoded);
-            JsonObject jsonObject = JsonParser.parseString(decodedString).getAsJsonObject();
-            String skinUrl = jsonObject.getAsJsonObject().get("textures").getAsJsonObject().get("SKIN").getAsJsonObject().get("url").toString();
-            skinUrl = skinUrl.substring(1, skinUrl.length() - 1);
+                sender.sendMessage("-- skin info for: " + args[1] + " --");
+                sender.sendMessage("Value" + skinProperty.getValue());
+                sender.sendMessage("Signature" + skinProperty.getSignature());
 
-            sender.sendMessage("skintextureUrl: " + skinUrl);
+                sender.sendMessage("----------------");
+
+                // this is the same what we do over at skinsRestorerAPI.getSkinTextureUrl
+                String textureUrl = PropertyUtil.getSkinTextureUrl(skinProperty);
+
+                sender.sendMessage("skintextureUrl: " + textureUrl);
+            } catch (MineSkinException | DataRequestException e) {
+                e.printStackTrace();
+                return false;
+            }
 
             return true;
         }
 
-
         if (skin.equalsIgnoreCase("getSkinUrl")) {
             // get textures.minecraft.net url for player current skin
-            sender.sendMessage(skinsRestorerAPI.getSkinTextureUrl(SkinsRestorerAPI.getApi().getSkinData(player.getName())));
+            PlayerStorage playerStorage = skinsRestorerAPI.getPlayerStorage();
+            try {
+                Optional<SkinProperty> property = playerStorage.getSkinForPlayer(player.getUniqueId(), player.getName());
+
+                if (property.isPresent()) {
+                    String textureUrl = PropertyUtil.getSkinTextureUrl(property.get());
+                    sender.sendMessage("skintextureUrl: " + textureUrl);
+                } else {
+                    sender.sendMessage("no skin found for player");
+                }
+            } catch (DataRequestException e) {
+                e.printStackTrace();
+            }
+
+            return true;
         }
 
         player.sendMessage(ChatColor.AQUA + "Setting your skin to " + skin);
 
         try {
+            SkinStorage skinStorage = skinsRestorerAPI.getSkinStorage();
+
             // /api custom
             if (skin.equalsIgnoreCase("custom")) {
-                skinsRestorerAPI.setSkinData("custom", skinsRestorerAPI.createPlatformProperty("textures", VALUE, SIGNATURE), 0);
+                skinStorage.setCustomSkinData("custom", SkinProperty.of(VALUE, SIGNATURE));
             }
 
-            // #setSkin() for player skin
-            skinsRestorerAPI.setSkin(player.getName(), skin);
+            // Find or generate skin data for skin
+            // This either generates it from the URL, finds a custom skin,
+            // finds the skin of a player (with that name) or returns an empty optional
+            // SkinsRestorer never requests the URL directly
+            // and instead tells MineSkin to generate the skin data with the URL
+            Optional<InputDataResult> result = skinStorage.findOrCreateSkinData(skin);
 
-            // Force skin refresh for player
-            skinsRestorerAPI.applySkin(new PlayerWrapper(player));
-        } catch (SkinRequestException e) {
+            if (result.isEmpty()) {
+                player.sendMessage(ChatColor.RED + "Skin not found!");
+                return true;
+            }
+
+            PlayerStorage playerStorage = skinsRestorerAPI.getPlayerStorage();
+
+            // Associate the skin with the player
+            playerStorage.setSkinIdOfPlayer(player.getUniqueId(), result.get().getIdentifier());
+
+            // Instantly apply skin to the player without requiring the player to rejoin
+            skinsRestorerAPI.getSkinApplier(Player.class).applySkin(player);
+        } catch (DataRequestException | MineSkinException e) {
             e.printStackTrace();
         }
+
         return true;
     }
 }

@@ -10,4 +10,5 @@ depend: [ "SkinsRestorer" ]
 
 commands:
   api:
+    default: op
     description: SkinsRestorer API test
