@@ -1,6 +1,6 @@
 package net.skinsrestorer;
 
-import net.skinsrestorer.api.PropertyUtil;
+import net.skinsrestorer.api.PropertyUtils;
 import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import net.skinsrestorer.api.connections.MineSkinAPI;
@@ -85,7 +85,7 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
                 sender.sendMessage("----------------");
 
                 // this is the same what we do over at skinsRestorerAPI.getSkinTextureUrl
-                String textureUrl = PropertyUtil.getSkinTextureUrl(skinProperty);
+                String textureUrl = PropertyUtils.getSkinTextureUrl(skinProperty);
 
                 sender.sendMessage("skintextureUrl: " + textureUrl);
             } catch (MineSkinException | DataRequestException e) {
@@ -103,7 +103,7 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
                 Optional<SkinProperty> property = playerStorage.getSkinForPlayer(player.getUniqueId(), player.getName());
 
                 if (property.isPresent()) {
-                    String textureUrl = PropertyUtil.getSkinTextureUrl(property.get());
+                    String textureUrl = PropertyUtils.getSkinTextureUrl(property.get());
                     sender.sendMessage("skintextureUrl: " + textureUrl);
                 } else {
                     sender.sendMessage("no skin found for player");
