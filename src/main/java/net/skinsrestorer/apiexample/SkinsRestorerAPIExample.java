@@ -1,8 +1,9 @@
-package net.skinsrestorer;
+package net.skinsrestorer.apiexample;
 
 import net.skinsrestorer.api.PropertyUtils;
 import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.SkinsRestorerProvider;
+import net.skinsrestorer.api.VersionProvider;
 import net.skinsrestorer.api.connections.MineSkinAPI;
 import net.skinsrestorer.api.connections.model.MineSkinResponse;
 import net.skinsrestorer.api.exception.DataRequestException;
@@ -15,11 +16,13 @@ import net.skinsrestorer.api.storage.SkinStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -35,11 +38,17 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
     @Override
     public void onEnable() {
         logger.info(ChatColor.AQUA + "Hooking into SkinsRestorer API");
+
+        if (!VersionProvider.isCompatibleWith("15")) {
+            logger.info("This plugin was made for SkinsRestorer v15, but " + VersionProvider.getVersionInfo() + " is installed. There may be errors!");
+        }
+
         // Retrieve the SkinsRestorer API for applying the skin
         skinsRestorerAPI = SkinsRestorerProvider.get();
 
         logger.info(ChatColor.AQUA + "Registering command");
-        getCommand("api").setExecutor(this);
+        PluginCommand apiCommand = Objects.requireNonNull(getCommand("api"));
+        apiCommand.setExecutor(this);
 
         logger.info(ChatColor.AQUA + "Done! :D");
     }
