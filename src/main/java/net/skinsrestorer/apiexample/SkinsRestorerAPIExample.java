@@ -62,7 +62,7 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
 
         // Help on /api without arguments
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.RED + "/api skin <skin name> - set your skin from name");
+            sender.sendMessage(ChatColor.RED + "/api skin <name|url> - set your skin from name or url");
             sender.sendMessage(ChatColor.RED + "/api custom - apply our custom skin from values :)");
             sender.sendMessage(ChatColor.RED + "/api genskin <url> [steve/slim] - generate skin from url using mineskin");
             sender.sendMessage(ChatColor.RED + "/api getskinurl get current skin url");
@@ -70,8 +70,6 @@ public class SkinsRestorerAPIExample extends JavaPlugin {
         }
 
         String skin = args[0];
-
-        sender.sendMessage("args.length" + args.length);
 
         // /api genskin <url>
         if (skin.equalsIgnoreCase("genskin") && args.length >= 2) {
