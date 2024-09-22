@@ -4,7 +4,7 @@ Learn how to use the SkinsRestorer API!
 
 ## Requirements
 
-- Java 17 or higher (This example plugin is compiled with Java 17)
+- Java 21 or higher (This example plugin is compiled with Java 21)
 - Maven
 
 ## Documentation
