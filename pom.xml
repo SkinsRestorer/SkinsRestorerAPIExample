@@ -32,7 +32,7 @@
         <dependency>
             <groupId>net.skinsrestorer</groupId>
             <artifactId>skinsrestorer-api</artifactId>
-            <version>15.7.3</version>
+            <version>15.7.4</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
