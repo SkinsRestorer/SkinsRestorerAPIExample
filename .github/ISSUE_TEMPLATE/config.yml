@@ -1,0 +1,6 @@
+blank_issues_enabled: true
+contact_links:
+- name: SkinsRestorer Discord
+  url: https://skinsrestorer.net/discord
+  about: Read setup guidance or ask a usage question before opening a development
+    issue.
